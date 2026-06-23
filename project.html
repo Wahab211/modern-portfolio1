@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+    <title>Scents by Ewah — Luxury Fragrances</title>
+    <!-- Tailwind CSS v3 CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        serif: ['Cormorant Garamond', 'serif'],
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        onyx: '#121212',
+                        gold: '#bc9c6a',
+                        goldLight: '#dfd2be',
+                        alabaster: '#fbfaf7',
+                        clay: '#6e6a66',
+                        borderLight: '#eae7e1',
+                        surface: '#ffffff'
+                    },
+                    animation: {
+                        'fade-in-up': 'fadeInUp 0.8s ease-out forwards',
+                        'marquee': 'marquee 25s linear infinite',
+                    },
+                    keyframes: {
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' }
+                        },
+                        marquee: {
+                            '0%': { transform: 'translateX(0%)' },
+                            '100%': { transform: 'translateX(-50%)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style type="text/tailwindcss">
+        @layer base {
+            body {
+                @apply bg-alabaster text-onyx font-sans antialiased pb-[72px] md:pb-0;
+            }
+            ::-webkit-scrollbar {
+                @apply w-1.5;
+            }
+            ::-webkit-scrollbar-track {
+                @apply bg-alabaster;
+            }
+            ::-webkit-scrollbar-thumb {
+                @apply bg-gold/30 rounded-full hover:bg-gold/50;
+            }
+        }
+
+        /* Reveal transitions on scroll */
+        .reveal {
+            @apply opacity-0 translate-y-8 transition-all duration-700 ease-out;
+        }
+        .reveal.in {
+            @apply opacity-100 translate-y-0;
+        }
+    </style>
+</head>
+<body class="overflow-x-hidden">
+
+<!-- ── Cart Sidebar Drawer ────────────────────────────────────────── -->
+<div id="cart-drawer" class="fixed inset-0 z-50 pointer-events-none invisible transition-all duration-300">
+    <div id="cart-overlay" class="absolute inset-0 bg-onyx/40 opacity-0 transition-opacity duration-300 pointer-events-auto" onclick="toggleCart()"></div>
+    <div class="absolute right-0 top-0 bottom-0 w-full max-w-md bg-white shadow-2xl p-6 flex flex-col translate-x-full transition-transform duration-300 ease-out pointer-events-auto">
+        <div class="flex items-center justify-between pb-4 border-b border-borderLight">
+            <h3 class="font-serif text-2xl font-bold tracking-tight">Your Shopping Bag (<span id="cart-count-drawer">0</span>)</h3>
+            <button onclick="toggleCart()" class="text-2xl hover:text-gold transition-colors">✕</button>
+        </div>
+        <div id="cart-items" class="flex-1 overflow-y-auto py-4 flex flex-col gap-4">
+            <!-- Dynamic cart items load here -->
+            <div id="empty-cart-msg" class="text-center py-12 text-clay font-light">
+                <span class="block text-4xl mb-2">✨</span> Your bag is currently empty.
+            </div>
+        </div>
+        <div class="border-t border-borderLight pt-4">
+            <div class="flex justify-between items-center mb-4">
+                <span class="text-sm uppercase tracking-wider text-clay">Subtotal</span>
+                <span id="cart-total" class="font-serif text-2xl font-semibold">$0.00</span>
+            </div>
+            <button onclick="checkout()" class="w-full bg-onyx hover:bg-gold text-white font-medium py-4 rounded-none transition-colors duration-300 tracking-widest text-xs uppercase">
+                Proceed to Checkout
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ── Desktop Navigation ─────────────────────────────────────────── -->
+<nav class="fixed top-0 left-0 right-0 z-40 h-[80px] hidden text-pink-300 md:flex items-center justify-between px-12 bg-alabaster/90 backdrop-blur-md border-b border-borderLight">
+    <a href="#" class="font-serif text-2xl font-bold tracking-widest uppercase text-onyx">
+        Ewah<span class="text-gold">.</span>
+    </a>
+    <ul class="flex gap-8 list-none uppercase tracking-widest text-[0.7rem] font-medium text-clay">
+        <li><a href="#collections" class="hover:text-onyx transition-colors">Collections</a></li>
+        <li><a href="#shop" class="hover:text-onyx transition-colors">Shop All</a></li>
+        <li><a href="#story" class="hover:text-onyx transition-colors">Our Story</a></li>
+    </ul>
+    <div class="flex items-center gap-6">
+        <button onclick="toggleCart()" class="relative flex items-center gap-2 text-[0.75rem] uppercase tracking-widest font-semibold hover:text-gold transition-colors">
+            <span>Bag</span>
+            <span class="bg-onyx text-white w-5 h-5 rounded-full flex items-center justify-center text-[0.65rem]" id="cart-count-nav">0</span>
+        </button>
+    </div>
+</nav>
+
+<!-- ── Mobile Bottom Navigation ────────────────────────────────────── -->
+<nav class="fixed bottom-0 left-0 right-0 z-40 h-[68px] md:hidden bg-white/95 backdrop-blur-md border-t border-borderLight flex items-center justify-around px-4">
+    <a href="#collections" class="flex flex-col items-center gap-1 text-[0.6rem] font-medium uppercase tracking-wider text-clay">
+        <span>🏺</span>Collections
+    </a>
+    <a href="#shop" class="flex flex-col items-center gap-1 text-[0.6rem] font-medium uppercase tracking-wider text-clay">
+        <span>✨</span>Shop
+    </a>
+    <button onclick="toggleCart()" class="relative flex flex-col items-center gap-1 text-[0.6rem] font-medium uppercase tracking-wider text-clay">
+        <span class="relative">
+            🛍️
+            <span id="cart-count-mob" class="absolute -top-1.5 -right-2 bg-gold text-white text-[0.55rem] w-4 h-4 rounded-full flex items-center justify-center">0</span>
+        </span>
+        Bag
+    </button>
+</nav>
+
+<!-- ── Hero Section ────────────────────────────────────────────────── -->
+<section class="relative min-h-screen pt-[80px] flex items-center bg-gradient-to-b from-[#f5f2eb] to-alabaster px-6 md:px-12 overflow-hidden">
+    <div class="absolute inset-0 z-0 opacity-20 pointer-events-none mix-blend-overlay bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1615655404705-71055258af1b?auto=format&fit=crop&q=80');"></div>
+    <div class="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-2 gap-12 items-center relative z-10">
+        <div class="text-center lg:text-left animate-fade-in-up">
+            <span class="text-xs uppercase tracking-[0.3em] text-gold font-semibold block mb-4">Scents By Ewah</span>
+            <h1 class="font-serif text-5xl sm:text-7xl lg:text-8xl font-light tracking-tight leading-[0.95] mb-6">
+                Liquid <br><em class="italic font-normal text-gold">Memories</em>
+            </h1>
+            <p class="text-clay max-w-md mx-auto lg:mx-0 text-base md:text-lg leading-relaxed font-light mb-8">
+                Artisanal fragrances meticulously blended to evoke untamed emotions, timeless refinement, and unspoken desires.
+            </p>
+            <div class="flex flex-wrap gap-4 justify-center lg:justify-start">
+                <a href="#shop" class="px-8 py-4 bg-onyx text-white hover:bg-gold text-xs uppercase tracking-widest font-semibold transition-colors duration-300">
+                    Explore Olfactive Shop
+                </a>
+            </div>
+        </div>
+        <div class="flex justify-center relative">
+            <div class="w-[280px] sm:w-[380px] aspect-[3/4] bg-neutral-200 shadow-2xl relative overflow-hidden group border border-borderLight">
+                <img src="https://images.unsplash.com/photo-1541643600914-78b084683601?auto=format&fit=crop&w=800&q=80" alt="Signature Bottle" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"/>
+                <div class="absolute bottom-4 left-4 right-4 bg-white/90 backdrop-blur-sm p-4 border border-borderLight text-center">
+                    <p class="font-serif text-xl">Oud Étranger</p>
+                    <p class="text-xs text-gold uppercase tracking-widest mt-1">Signature Extract — $185</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ── Infinite Marquee ────────────────────────────────────────────── -->
+<div class="bg-onyx text-white py-4 overflow-hidden whitespace-nowrap border-y border-gold/20 select-none">
+    <div class="inline-block animate-marquee uppercase tracking-[0.2em] text-xs font-light">
+        CRUELTY FREE • SUSTAINABLY SOURCED MATERIA • CRUELTY FREE • SUSTAINABLY SOURCED MATERIA • CRUELTY FREE • SUSTAINABLY SOURCED MATERIA • CRUELTY FREE • SUSTAINABLY SOURCED MATERIA • 
+    </div>
+    <div class="inline-block animate-marquee uppercase tracking-[0.2em] text-xs font-light">
+        CRUELTY FREE • SUSTAINABLY SOURCED MATERIA • CRUELTY FREE • SUSTAINABLY SOURCED MATERIA • CRUELTY FREE • SUSTAINABLY SOURCED MATERIA • CRUELTY FREE • SUSTAINABLY SOURCED MATERIA • 
+    </div>
+</div>
+
+<!-- ── Bento Grid Collections ──────────────────────────────────────── -->
+<section id="collections" class="py-20 px-6 md:px-12 max-w-7xl mx-auto">
+    <div class="reveal mb-12 text-center">
+        <span class="text-xs uppercase tracking-[0.2em] text-gold block mb-2">Curated Chapters</span>
+        <h2 class="font-serif text-3xl md:text-5xl tracking-tight">Olfactive Families</h2>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Card 1 -->
+        <div class="reveal group relative bg-white border border-borderLight p-8 flex flex-col justify-between min-h-[320px] transition-all hover:shadow-xl">
+            <div class="absolute inset-0 opacity-10 group-hover:opacity-20 transition-opacity bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1592945403244-b3fbafd7f539?auto=format&fit=crop&w=600&q=80')"></div>
+            <div>
+                <span class="text-xs uppercase text-gold tracking-widest">01 / Intense Woods</span>
+                <h3 class="font-serif text-3xl mt-2 font-medium">Earth & Smoke</h3>
+            </div>
+            <p class="text-clay text-sm font-light z-10">Deep Vetiver, Smoked Cedarwood, and rare Indonesian Patchouli extracts.</p>
+        </div>
+        <!-- Card 2 -->
+        <div class="reveal group relative bg-onyx text-white p-8 flex flex-col justify-between min-h-[320px] transition-all hover:shadow-xl">
+            <div class="absolute inset-0 opacity-10 group-hover:opacity-20 transition-opacity bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1600612253964-b5eb291bc90a?auto=format&fit=crop&w=600&q=80')"></div>
+            <div>
+                <span class="text-xs uppercase text-goldLight tracking-widest">02 / Exotic Opulence</span>
+                <h3 class="font-serif text-3xl mt-2 font-medium">Nocturnal Oud</h3>
+            </div>
+            <p class="text-neutral-400 text-sm font-light z-10">Spiced Saffron, Bulgarian Rose, and pure dark Cambodian Agarwood distillation.</p>
+        </div>
+        <!-- Card 3 -->
+        <div class="reveal group relative bg-white border border-borderLight p-8 flex flex-col justify-between min-h-[320px] transition-all hover:shadow-xl">
+            <div class="absolute inset-0 opacity-10 group-hover:opacity-20 transition-opacity bg-cover bg-center" style="background-image: url('https://images.unsplash.com/photo-1512207724213-747424901c4c?auto=format&fit=crop&w=600&q=80')"></div>
+            <div>
+                <span class="text-xs uppercase text-gold tracking-widest">03 / Fresh Solar</span>
+                <h3 class="font-serif text-3xl mt-2 font-medium">Citrus Lumina</h3>
+            </div>
+            <p class="text-clay text-sm font-light z-10">Crisp Sicilian Bergamot, Neroli blooms, and refreshing sea salt air accords.</p>
+        </div>
+    </div>
+</section>
+
+<!-- ── E-Commerce Shop Matrix ──────────────────────────────────────── -->
+<section id="shop" class="py-20 bg-white border-t border-b border-borderLight px-6 md:px-12">
+    <div class="max-w-7xl mx-auto">
+        <div class="reveal flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+            <div>
+                <span class="text-xs uppercase tracking-[0.2em] text-gold block mb-2">The Collection</span>
+                <h2 class="font-serif text-3xl md:text-5xl tracking-tight">Shop Extracts & Eaux</h2>
+            </div>
+            <!-- Category Filter Row -->
+            <div class="flex flex-wrap gap-2 text-xs uppercase tracking-widest">
+                <button onclick="filterCategory('all')" class="cat-btn px-4 py-2 border border-onyx bg-onyx text-white transition-all">All</button>
+                <button onclick="filterCategory('Oud')" class="cat-btn px-4 py-2 border border-borderLight hover:border-onyx transition-all">Oud</button>
+                <button onclick="filterCategory('Fresh')" class="cat-btn px-4 py-2 border border-borderLight hover:border-onyx transition-all">Fresh</button>
+                <button onclick="filterCategory('Floral')" class="cat-btn px-4 py-2 border border-borderLight hover:border-onyx transition-all">Floral</button>
+            </div>
+        </div>
+
+        <!-- Products Dynamic Layout Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8" id="product-grid">
+            <!-- Product Item 1 -->
+            <div class="product-card reveal group flex flex-col bg-alabaster border border-borderLight p-4" data-category="Oud">
+                <div class="aspect-[4/5] bg-neutral-100 overflow-hidden relative mb-4">
+                    <img src="https://images.unsplash.com/photo-1541643600914-78b084683601?auto=format&fit=crop&w=600&q=80" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" alt="Oud Étranger"/>
+                </div>
+                <div class="flex-1 flex flex-col justify-between">
+                    <div>
+                        <h3 class="font-serif text-xl tracking-wide text-onyx">Oud Étranger</h3>
+                        <p class="text-xs text-clay mt-1">Rich, Mysterious, Warm Woody Accords</p>
+                    </div>
+                    <div class="mt-4 flex items-center justify-between border-t border-borderLight/60 pt-3">
+                        <span class="font-serif font-semibold text-lg text-onyx">$185.00</span>
+                        <button onclick="addToCart('Oud Étranger', 185.00)" class="text-xs uppercase tracking-widest bg-onyx text-white px-4 py-2 hover:bg-gold transition-colors">
+                            Add to Bag
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product Item 2 -->
+            <div class="product-card reveal group flex flex-col bg-alabaster border border-borderLight p-4" data-category="Fresh">
+                <div class="aspect-[4/5] bg-neutral-100 overflow-hidden relative mb-4">
+                    <img src="https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&w=600&q=80" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" alt="Bergamot Soleil"/>
+                </div>
+                <div class="flex-1 flex flex-col justify-between">
+                    <div>
+                        <h3 class="font-serif text-xl tracking-wide text-onyx">Bergamot Soleil</h3>
+                        <p class="text-xs text-clay mt-1">Crisp Citrus, Sea Accords, Bright Amber</p>
+                    </div>
+                    <div class="mt-4 flex items-center justify-between border-t border-borderLight/60 pt-3">
+                        <span class="font-serif font-semibold text-lg text-onyx">$145.00</span>
+                        <button onclick="addToCart('Bergamot Soleil', 145.00)" class="text-xs uppercase tracking-widest bg-onyx text-white px-4 py-2 hover:bg-gold transition-colors">
+                            Add to Bag
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product Item 3 -->
+            <div class="product-card reveal group flex flex-col bg-alabaster border border-borderLight p-4" data-category="Floral">
+                <div class="aspect-[4/5] bg-neutral-100 overflow-hidden relative mb-4">
+                    <img src="https://images.unsplash.com/photo-1523293182086-7651a899d37f?auto=format&fit=crop&w=600&q=80" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" alt="Rose Epicee"/>
+                </div>
+                <div class="flex-1 flex flex-col justify-between">
+                    <div>
+                        <h3 class="font-serif text-xl tracking-wide text-onyx">Rose Épicée</h3>
+                        <p class="text-xs text-clay mt-1">Velvety Rose Blooms, Pink Pepper, Musk</p>
+                    </div>
+                    <div class="mt-4 flex items-center justify-between border-t border-borderLight/60 pt-3">
+                        <span class="font-serif font-semibold text-lg text-onyx">$160.00</span>
+                        <button onclick="addToCart('Rose Épicée', 160.00)" class="text-xs uppercase tracking-widest bg-onyx text-white px-4 py-2 hover:bg-gold transition-colors">
+                            Add to Bag
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ── Brand Heritage Story ────────────────────────────────────────── -->
+<section id="story" class="py-20 px-6 md:px-12 max-w-5xl mx-auto">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+        <div class="reveal">
+            <span class="text-xs uppercase tracking-[0.2em] text-gold block mb-2">Our Manifesto</span>
+            <h2 class="font-serif text-4xl md:text-5xl tracking-tight leading-tight mb-6">Artistry over compromise.</h2>
+            <p class="text-clay text-sm leading-relaxed font-light mb-4">
+                Founded on the philosophy that true luxury lies in restraint and distinction, Scents by Ewah rejects standard corporate scent matrix formulations. 
+            </p>
+            <p class="text-clay text-sm leading-relaxed font-light">
+                We extract completely pure essential raw oils from partners across Grasse and Kyoto, prioritizing minimal structural interference so that each bottle ages dynamically on your skin.
+            </p>
+        </div>
+        <div class="reveal bg-neutral-100 aspect-square overflow-hidden border border-borderLight">
+            <img src="https://images.unsplash.com/photo-1616949755610-8c9bbc08f138?auto=format&fit=crop&w=800&q=80" alt="Botanical Distillation" class="w-full h-full object-cover"/>
+        </div>
+    </div>
+</section>
+
+<!-- ── Contact / Newsletter ────────────────────────────────────────── -->
+<section class="py-20 bg-onyx text-white px-6 md:px-12 text-center relative overflow-hidden">
+    <div class="absolute -top-[100px] -left-[100px] w-[400px] h-[400px] rounded-full bg-gold/5 blur-[120px] pointer-events-none"></div>
+    <div class="max-w-xl mx-auto relative z-10 reveal">
+        <span class="text-xs uppercase tracking-[0.3em] text-gold block mb-3">Mailing Concierge</span>
+        <h2 class="font-serif text-3xl md:text-5xl font-light mb-4">Join the Inner Circle</h2>
+        <p class="text-neutral-400 text-xs md:text-sm tracking-wide font-light mb-8">Receive private access to limited edition seasonal drops and collection previews.</p>
+        
+        <form onsubmit="handleSubscribe(event)" class="flex flex-col sm:flex-row gap-2 border-b border-neutral-700 pb-2 max-w-md mx-auto">
+            <input type="email" placeholder="Your elegant email address" class="bg-transparent text-white placeholder-neutral-500 text-sm font-light py-2 px-3 outline-none flex-1" required/>
+            <button type="submit" id="sub-btn" class="text-xs uppercase tracking-widest text-gold hover:text-white transition-colors font-medium py-2 px-4 shrink-0">
+                Subscribe →
+            </button>
+        </form>
+    </div>
+</section>
+
+<!-- ── Elegant Footer ─────────────────────────────────────────────── -->
+<footer class="p-8 border-t border-borderLight flex flex-col sm:flex-row justify-between items-center text-center gap-4 bg-alabaster">
+    <div class="font-serif font-bold text-xl tracking-widest uppercase">Ewah<span class="text-gold">.</span></div>
+    <p class="text-[0.7rem] uppercase tracking-widest text-clay">© 2026 Scents by Ewah • Curated with Ultimate Precision</p>
+</footer>
+
+<!-- ── Dynamic Core JS logic ──────────────────────────────────────── -->
+<script>
+// 🛍️ Live Shopping Cart State Matrix
+let cart = [];
+
+function toggleCart() {
+    const drawer = document.getElementById('cart-drawer');
+    const overlay = drawer.querySelector('#cart-overlay');
+    const panel = drawer.querySelector('.max-w-md');
+    
+    if(drawer.classList.contains('invisible')) {
+        drawer.classList.remove('invisible');
+        setTimeout(() => {
+            overlay.classList.replace('opacity-0', 'opacity-100');
+            panel.classList.replace('translate-x-full', 'translate-x-0');
+        }, 10);
+    } else {
+        overlay.classList.replace('opacity-100', 'opacity-0');
+        panel.classList.replace('translate-x-0', 'translate-x-full');
+        setTimeout(() => drawer.classList.add('invisible'), 300);
+    }
+}
+
+function addToCart(name, price) {
+    const existingItem = cart.find(item => item.name === name);
+    if(existingItem) {
+        existingItem.qty++;
+    } else {
+        cart.push({ name, price, qty: 1 });
+    }
+    updateCartUI();
+    toggleCart(); // Automatically open drawer on addition
+}
+
+function updateCartItemQty(name, amount) {
+    const item = cart.find(i => i.name === name);
+    if(item) {
+        item.qty += amount;
+        if(item.qty <= 0) {
+            cart = cart.filter(i => i.name !== name);
+        }
+    }
+    updateCartUI();
+}
+
+function updateCartUI() {
+    const itemsContainer = document.getElementById('cart-items');
+    const emptyMsg = document.getElementById('empty-cart-msg');
+    
+    // Total count variables
+    const totalCount = cart.reduce((acc, current) => acc + current.qty, 0);
+    const totalPrice = cart.reduce((acc, current) => acc + (current.price * current.qty), 0);
+    
+    // Update count labels across UI breakpoints
+    document.getElementById('cart-count-nav').textContent = totalCount;
+    document.getElementById('cart-count-mob').textContent = totalCount;
+    document.getElementById('cart-count-drawer').textContent = totalCount;
+    document.getElementById('cart-total').textContent = `$${totalPrice.toFixed(2)}`;
+    
+    // Remove old element items
+    const elements = itemsContainer.querySelectorAll('.cart-element');
+    elements.forEach(e => e.remove());
+    
+    if(cart.length === 0) {
+        emptyMsg.style.display = 'block';
+    } else {
+        emptyMsg.style.display = 'none';
+        cart.forEach(item => {
+            const div = document.createElement('div');
+            div.className = "cart-element flex justify-between items-center bg-alabaster border border-borderLight p-3 animate-fade-in-up";
+            div.innerHTML = `
+                <div>
+                    <h4 class="font-serif text-base font-semibold">${item.name}</h4>
+                    <span class="text-xs text-gold font-medium">$${item.price.toFixed(2)}</span>
+                </div>
+                <div class="flex items-center border border-borderLight bg-white">
+                    <button class="px-2 py-1 text-xs hover:bg-neutral-100" onclick="updateCartItemQty('${item.name}', -1)">-</button>
+                    <span class="px-3 text-xs font-semibold">${item.qty}</span>
+                    <button class="px-2 py-1 text-xs hover:bg-neutral-100" onclick="updateCartItemQty('${item.name}', 1)">+</button>
+                </div>
+            `;
+            itemsContainer.appendChild(div);
+        });
+    }
+}
+
+function checkout() {
+    if(cart.length === 0) return alert('Your bag is empty.');
+    alert('Thank you for choosing Ewah. Processing luxurious package checkout simulation.');
+    cart = [];
+    updateCartUI();
+    toggleCart();
+}
+
+// 🏷️ Category Filter Logic Matrix
+function filterCategory(cat) {
+    const cards = document.querySelectorAll('.product-card');
+    const buttons = document.querySelectorAll('.cat-btn');
+    
+    // Toggle active state classes for context buttons
+    buttons.forEach(btn => {
+        if(btn.textContent.trim() === cat || (cat === 'all' && btn.textContent.trim() === 'All')) {
+            btn.className = "cat-btn px-4 py-2 border border-onyx bg-onyx text-white transition-all";
+        } else {
+            btn.className = "cat-btn px-4 py-2 border border-borderLight hover:border-onyx transition-all";
+        }
+    });
+
+    cards.forEach(card => {
+        if(cat === 'all' || card.getAttribute('data-category') === cat) {
+            card.style.display = 'flex';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}
+
+// 📦 Smooth Intersectional Observer for Scroll Reveals
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry, idx) => {
+        if (entry.isIntersecting) {
+            setTimeout(() => entry.target.classList.add('in'), idx * 60);
+            observer.unobserve(entry.target);
+        }
+    });
+}, { threshold: 0.08 });
+
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// ✉️ Newsletter Handlers
+function handleSubscribe(e) {
+    e.preventDefault();
+    const btn = document.getElementById('sub-btn');
+    btn.textContent = "Welcome ✓";
+    btn.style.color = "#bc9c6a";
+    e.target.reset();
+}
+</script>
+</body>
+</html>
